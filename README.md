@@ -1,2 +1,0 @@
-# Plant-Stock
-PHP exam

@@ -1,7 +1,7 @@
 <?php
 session_start();
 require_once 'db_connect.php';
-require_once 'fpdf/fpdf.php';
+require_once 'tcpdf/tcpdf.php';
 
 if (!isset($_SESSION['user_id'])) {
     header("Location: login.php");
@@ -26,6 +26,7 @@ $lang = [
         'quantity' => 'Quantity'
     ]
 ];
+
 $current_lang = $_SESSION['lang'];
 
 $stmt = $conn->prepare("SELECT * FROM products");
@@ -33,33 +34,43 @@ $stmt->execute();
 $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 // สร้าง PDF
-$pdf = new FPDF();
+$pdf = new TCPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
+$pdf->SetCreator(PDF_CREATOR);
+$pdf->SetAuthor('Stock Management System');
+$pdf->SetTitle($lang[$current_lang]['title']);
+$pdf->SetHeaderData('', 0, $lang[$current_lang]['title'], '');
+
+// ✅ ใช้ฟอนต์ที่รองรับภาษาไทย
+$pdf->SetFont('freeserif', '', 12);
+$pdf->SetMargins(10, 10, 10);
 $pdf->AddPage();
 
-// เพิ่มฟอนต์ THSarabunNew
-$pdf->AddFont('THSarabunNew', '', 'THSarabunNew.php');
-$pdf->SetFont('THSarabunNew', '', 16);
+// สร้างตาราง HTML
+$html = '<h1 style="text-align:center;">' . htmlspecialchars($lang[$current_lang]['title'], ENT_QUOTES, 'UTF-8') . '</h1>';
+$html .= '<table border="1" cellpadding="5">
+    <thead>
+        <tr style="background-color: #f2f2f2;">
+            <th width="40%">' . htmlspecialchars($lang[$current_lang]['name_th'], ENT_QUOTES, 'UTF-8') . '</th>
+            <th width="40%">' . htmlspecialchars($lang[$current_lang]['name_en'], ENT_QUOTES, 'UTF-8') . '</th>
+            <th width="20%">' . htmlspecialchars($lang[$current_lang]['quantity'], ENT_QUOTES, 'UTF-8') . '</th>
+        </tr>
+    </thead>
+    <tbody>';
 
-// หัวข้อ
-$pdf->Cell(0, 10, iconv('UTF-8', 'TIS-620', $lang[$current_lang]['title']), 0, 1, 'C');
-$pdf->Ln(10);
-
-// หัวตาราง
-$pdf->SetFont('THSarabunNew', '', 12);
-$pdf->Cell(60, 10, iconv('UTF-8', 'TIS-620', $lang[$current_lang]['name_th']), 1);
-$pdf->Cell(60, 10, $lang[$current_lang]['name_en'], 1); // ชื่อภาษาอังกฤษไม่ต้องแปลง
-$pdf->Cell(30, 10, iconv('UTF-8', 'TIS-620', $lang[$current_lang]['quantity']), 1);
-$pdf->Ln();
-
-// ข้อมูลสินค้า
 foreach ($products as $product) {
-    $pdf->Cell(60, 10, iconv('UTF-8', 'TIS-620', $product['name_th']), 1); // แปลงชื่อภาษาไทย
-    $pdf->Cell(60, 10, $product['name_en'], 1); // ชื่อภาษาอังกฤษไม่ต้องแปลง
-    $pdf->Cell(30, 10, $product['quantity'], 1);
-    $pdf->Ln();
+    $html .= '<tr>
+        <td>' . htmlspecialchars($product['name_th'], ENT_QUOTES, 'UTF-8') . '</td>
+        <td>' . htmlspecialchars($product['name_en'], ENT_QUOTES, 'UTF-8') . '</td>
+        <td>' . intval($product['quantity']) . '</td>
+    </tr>';
 }
 
+$html .= '</tbody></table>';
+
+// ใส่ HTML ลงใน PDF
+$pdf->writeHTML($html, true, false, true, false, '');
+
 // ส่งออก PDF
-$pdf->Output('D', 'stock_report.pdf');
+$pdf->Output('stock_report.pdf', 'D');
 exit();
 ?>
