@@ -14,7 +14,7 @@ if (!isset($_SESSION['lang'])) {
 
 $lang = [
     'th' => [
-        'title' => 'รายงานสต็อกสินค้าต้นไม้ (TH/EN)',
+        'title' => 'Plant Stock Report (TH/EN)',
         'name_th' => 'ชื่อ (TH)',
         'name_en' => 'Name (EN)',
         'quantity' => 'จำนวน'
@@ -33,23 +33,29 @@ $stmt = $conn->prepare("SELECT * FROM products");
 $stmt->execute();
 $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-// สร้าง PDF
+
 $pdf = new TCPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
 $pdf->SetCreator(PDF_CREATOR);
 $pdf->SetAuthor('Stock Management System');
 $pdf->SetTitle($lang[$current_lang]['title']);
 $pdf->SetHeaderData('', 0, $lang[$current_lang]['title'], '');
 
-// ✅ ใช้ฟอนต์ที่รองรับภาษาไทย
-$pdf->SetFont('freeserif', '', 12);
+
+$pdf->SetFont('freeserif', '', 10);
 $pdf->SetMargins(10, 10, 10);
 $pdf->AddPage();
 
-// สร้างตาราง HTML
-$html = '<h1 style="text-align:center;">' . htmlspecialchars($lang[$current_lang]['title'], ENT_QUOTES, 'UTF-8') . '</h1>';
-$html .= '<table border="1" cellpadding="5">
+
+$html = '<style>
+    table { border-collapse: collapse; width: 100%; }
+    th, td { border: 1px solid black; padding: 5px; text-align: center; }
+    th { background-color: #f2f2f2; font-weight: bold; }
+</style>';
+
+$html .= '<h1 style="text-align:center;">' . htmlspecialchars($lang[$current_lang]['title'], ENT_QUOTES, 'UTF-8') . '</h1>';
+$html .= '<table>
     <thead>
-        <tr style="background-color: #f2f2f2;">
+        <tr>
             <th width="40%">' . htmlspecialchars($lang[$current_lang]['name_th'], ENT_QUOTES, 'UTF-8') . '</th>
             <th width="40%">' . htmlspecialchars($lang[$current_lang]['name_en'], ENT_QUOTES, 'UTF-8') . '</th>
             <th width="20%">' . htmlspecialchars($lang[$current_lang]['quantity'], ENT_QUOTES, 'UTF-8') . '</th>
@@ -58,19 +64,23 @@ $html .= '<table border="1" cellpadding="5">
     <tbody>';
 
 foreach ($products as $product) {
+    $quantity = intval($product['quantity']);
+    $color = ($quantity < 5) ? 'color:red; font-weight:bold;' : '';
+    $restock = ($quantity < 5) ? ' <span style="color:red;">(Restock)</span>' : '';
+
     $html .= '<tr>
-        <td>' . htmlspecialchars($product['name_th'], ENT_QUOTES, 'UTF-8') . '</td>
-        <td>' . htmlspecialchars($product['name_en'], ENT_QUOTES, 'UTF-8') . '</td>
-        <td>' . intval($product['quantity']) . '</td>
+        <td width="40%" style="text-align:left;">' . htmlspecialchars($product['name_th'], ENT_QUOTES, 'UTF-8') . '</td>
+        <td width="40%" style="text-align:left;">' . htmlspecialchars($product['name_en'], ENT_QUOTES, 'UTF-8') . '</td>
+        <td width="20%" style="text-align:center; ' . $color . '">' . $quantity . $restock . '</td>
     </tr>';
 }
 
 $html .= '</tbody></table>';
 
-// ใส่ HTML ลงใน PDF
+
 $pdf->writeHTML($html, true, false, true, false, '');
 
-// ส่งออก PDF
+
 $pdf->Output('stock_report.pdf', 'D');
 exit();
 ?>
