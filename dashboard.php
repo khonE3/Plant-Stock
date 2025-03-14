@@ -17,30 +17,34 @@ if (isset($_GET['lang'])) {
 
 $lang = [
     'th' => [
-        'title' => 'ระบบสต็อกสินค้าต้นไม้',
+        'title' => 'ระบบสต็อกสินค้าน้ำดื่ม',
         'add_product' => 'เพิ่มสินค้า',
         'report' => 'สร้างรายงาน PDF',
         'logout' => 'ออกจากระบบ',
         'search' => 'ค้นหาสินค้า...',
         'search_btn' => 'ค้นหา',
+        'product_id' => 'ไอดีสินค้า', // เพิ่ม
         'name_th' => 'ชื่อ (TH)',
         'name_en' => 'Name (EN)',
         'quantity' => 'จำนวน',
+        'price_unit' => 'ราคา (บาท)', // เพิ่ม
         'actions' => 'การจัดการ',
         'edit' => 'แก้ไข',
         'delete' => 'ลบ',
         'confirm_delete' => 'แน่ใจหรือไม่?'
     ],
     'en' => [
-        'title' => 'Plant Stock Management System',
+        'title' => 'Water Stock Management System',
         'add_product' => 'Add Product',
         'report' => 'Generate PDF Report',
         'logout' => 'Logout',
         'search' => 'Search products...',
         'search_btn' => 'Search',
+        'product_id' => 'Product ID', // เพิ่ม
         'name_th' => 'Name (TH)',
         'name_en' => 'Name (EN)',
         'quantity' => 'Quantity',
+        'price_unit' => 'Price (THB)', // เพิ่ม
         'actions' => 'Actions',
         'edit' => 'Edit',
         'delete' => 'Delete',
@@ -91,18 +95,22 @@ $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
         <table class="w-full bg-white shadow-md rounded">
             <thead>
                 <tr class="bg-gray-200">
+                    <th class="p-2"><?php echo $lang[$current_lang]['product_id']; ?></th>
                     <th class="p-2"><?php echo $lang[$current_lang]['name_th']; ?></th>
                     <th class="p-2"><?php echo $lang[$current_lang]['name_en']; ?></th>
                     <th class="p-2"><?php echo $lang[$current_lang]['quantity']; ?></th>
+                    <th class="p-2"><?php echo $lang[$current_lang]['price_unit']; ?></th>
                     <th class="p-2"><?php echo $lang[$current_lang]['actions']; ?></th>
                 </tr>
             </thead>
             <tbody>
                 <?php foreach ($products as $product): ?>
                 <tr>
+                    <td class="p-2"><?php echo $product['product_id']; ?></td>
                     <td class="p-2"><?php echo $product['name_th']; ?></td>
                     <td class="p-2"><?php echo $product['name_en']; ?></td>
                     <td class="p-2"><?php echo $product['quantity']; ?></td>
+                    <td class="p-2"><?php echo number_format($product['price_unit'], 2); ?></td>
                     <td class="p-2">
                         <a href="edit_product.php?product_id=<?php echo $product['product_id']; ?>" class="text-blue-500">
                             <?php echo $lang[$current_lang]['edit']; ?>

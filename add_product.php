@@ -21,6 +21,7 @@ $lang = [
         'name_th' => 'ชื่อ (TH)',
         'name_en' => 'Name (EN)',
         'quantity' => 'จำนวน',
+        'price_unit' => 'ราคา (บาท)',
         'add' => 'เพิ่มสินค้า',
         'back' => 'กลับไปที่หน้าหลัก'
     ],
@@ -29,6 +30,7 @@ $lang = [
         'name_th' => 'Name (TH)',
         'name_en' => 'Name (EN)',
         'quantity' => 'Quantity',
+        'price_unit' => 'Price (THB)',
         'add' => 'Add Product',
         'back' => 'Back to Dashboard'
     ]
@@ -39,9 +41,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $name_th = $_POST['name_th'];
     $name_en = $_POST['name_en'];
     $quantity = $_POST['quantity'];
+    $price_unit = $_POST['price_unit'];
 
-    $stmt = $conn->prepare("INSERT INTO products (name_th, name_en, quantity) VALUES (:name_th, :name_en, :quantity)");
-    $stmt->execute(['name_th' => $name_th, 'name_en' => $name_en, 'quantity' => $quantity]);
+    $stmt = $conn->prepare("INSERT INTO products (name_th, name_en, quantity, price_unit) VALUES (:name_th, :name_en, :quantity, :price_unit)");
+    $stmt->execute([
+        'name_th' => $name_th,
+        'name_en' => $name_en,
+        'quantity' => $quantity,
+        'price_unit' => $price_unit
+    ]);
     header("Location: dashboard.php");
     exit();
 }
@@ -74,6 +82,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             <div class="mb-4">
                 <label class="block text-gray-700"><?php echo $lang[$current_lang]['quantity']; ?></label>
                 <input type="number" name="quantity" class="w-full p-2 border rounded" required min="0">
+            </div>
+            <div class="mb-4">
+                <label class="block text-gray-700"><?php echo $lang[$current_lang]['price_unit']; ?></label>
+                <input type="number" name="price_unit" step="0.01" class="w-full p-2 border rounded" required min="0">
             </div>
             <button type="submit" class="w-full bg-green-500 text-white p-2 rounded">
                 <?php echo $lang[$current_lang]['add']; ?>

@@ -21,6 +21,7 @@ $lang = [
         'name_th' => 'ชื่อ (TH)',
         'name_en' => 'Name (EN)',
         'quantity' => 'จำนวน',
+        'price_unit' => 'ราคา (บาท)', // เพิ่ม
         'save' => 'บันทึก',
         'back' => 'กลับไปที่หน้าหลัก'
     ],
@@ -29,6 +30,7 @@ $lang = [
         'name_th' => 'Name (TH)',
         'name_en' => 'Name (EN)',
         'quantity' => 'Quantity',
+        'price_unit' => 'Price (THB)', // เพิ่ม
         'save' => 'Save',
         'back' => 'Back to Dashboard'
     ]
@@ -44,9 +46,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $name_th = $_POST['name_th'];
     $name_en = $_POST['name_en'];
     $quantity = $_POST['quantity'];
+    $price_unit = $_POST['price_unit']; // เพิ่ม
 
-    $stmt = $conn->prepare("UPDATE products SET name_th = :name_th, name_en = :name_en, quantity = :quantity WHERE product_id = :product_id"); // เปลี่ยน id เป็น product_id
-    $stmt->execute(['name_th' => $name_th, 'name_en' => $name_en, 'quantity' => $quantity, 'product_id' => $product_id]);
+    $stmt = $conn->prepare("UPDATE products SET name_th = :name_th, name_en = :name_en, quantity = :quantity, price_unit = :price_unit WHERE product_id = :product_id");
+    $stmt->execute([
+        'name_th' => $name_th,
+        'name_en' => $name_en,
+        'quantity' => $quantity,
+        'price_unit' => $price_unit,
+        'product_id' => $product_id
+    ]);
     header("Location: dashboard.php");
     exit();
 }
@@ -81,6 +90,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             <div class="mb-4">
                 <label class="block text-gray-700"><?php echo $lang[$current_lang]['quantity']; ?></label>
                 <input type="number" name="quantity" value="<?php echo $product['quantity']; ?>" 
+                       class="w-full p-2 border rounded" required min="0">
+            </div>
+            <div class="mb-4">
+                <label class="block text-gray-700"><?php echo $lang[$current_lang]['price_unit']; ?></label>
+                <input type="number" name="price_unit" step="0.01" value="<?php echo $product['price_unit']; ?>" 
                        class="w-full p-2 border rounded" required min="0">
             </div>
             <button type="submit" class="w-full bg-blue-500 text-white p-2 rounded">

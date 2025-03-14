@@ -14,16 +14,20 @@ if (!isset($_SESSION['lang'])) {
 
 $lang = [
     'th' => [
-        'title' => 'Plant Stock Report (TH/EN)',
+        'title' => 'Water Stock Report (TH/EN)',
         'name_th' => 'ชื่อ (TH)',
         'name_en' => 'Name (EN)',
-        'quantity' => 'จำนวน'
+        'quantity' => 'จำนวน',
+        'product_id' => 'ไอดีสินค้า',
+        'price_unit' => 'ราคา (บาท)'
     ],
     'en' => [
-        'title' => 'Plant Stock Report (TH/EN)',
+        'title' => 'Water Stock Report (TH/EN)',
         'name_th' => 'Name (TH)',
         'name_en' => 'Name (EN)',
-        'quantity' => 'Quantity'
+        'quantity' => 'Quantity',
+        'product_id' => 'Product ID',
+        'price_unit' => 'Price (THB)'
     ]
 ];
 
@@ -33,18 +37,15 @@ $stmt = $conn->prepare("SELECT * FROM products");
 $stmt->execute();
 $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-
 $pdf = new TCPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
 $pdf->SetCreator(PDF_CREATOR);
 $pdf->SetAuthor('Stock Management System');
 $pdf->SetTitle($lang[$current_lang]['title']);
 $pdf->SetHeaderData('', 0, $lang[$current_lang]['title'], '');
 
-
 $pdf->SetFont('freeserif', '', 10);
 $pdf->SetMargins(10, 10, 10);
 $pdf->AddPage();
-
 
 $html = '<style>
     table { border-collapse: collapse; width: 100%; }
@@ -56,9 +57,11 @@ $html .= '<h1 style="text-align:center;">' . htmlspecialchars($lang[$current_lan
 $html .= '<table>
     <thead>
         <tr>
-            <th width="40%">' . htmlspecialchars($lang[$current_lang]['name_th'], ENT_QUOTES, 'UTF-8') . '</th>
-            <th width="40%">' . htmlspecialchars($lang[$current_lang]['name_en'], ENT_QUOTES, 'UTF-8') . '</th>
-            <th width="20%">' . htmlspecialchars($lang[$current_lang]['quantity'], ENT_QUOTES, 'UTF-8') . '</th>
+            <th width="20%">' . htmlspecialchars($lang[$current_lang]['product_id'], ENT_QUOTES, 'UTF-8') . '</th>
+            <th width="25%">' . htmlspecialchars($lang[$current_lang]['name_th'], ENT_QUOTES, 'UTF-8') . '</th>
+            <th width="25%">' . htmlspecialchars($lang[$current_lang]['name_en'], ENT_QUOTES, 'UTF-8') . '</th>
+            <th width="15%">' . htmlspecialchars($lang[$current_lang]['quantity'], ENT_QUOTES, 'UTF-8') . '</th>
+            <th width="15%">' . htmlspecialchars($lang[$current_lang]['price_unit'], ENT_QUOTES, 'UTF-8') . '</th>
         </tr>
     </thead>
     <tbody>';
@@ -69,17 +72,17 @@ foreach ($products as $product) {
     $restock = ($quantity < 5) ? ' <span style="color:red;">(Restock)</span>' : '';
 
     $html .= '<tr>
-        <td width="40%" style="text-align:left;">' . htmlspecialchars($product['name_th'], ENT_QUOTES, 'UTF-8') . '</td>
-        <td width="40%" style="text-align:left;">' . htmlspecialchars($product['name_en'], ENT_QUOTES, 'UTF-8') . '</td>
-        <td width="20%" style="text-align:center; ' . $color . '">' . $quantity . $restock . '</td>
+        <td width="20%" style="text-align: center;">' . $product['product_id'] . '</td>
+        <td width="25%" style="text-align:left;">' . htmlspecialchars($product['name_th'], ENT_QUOTES, 'UTF-8') . '</td>
+        <td width="25%" style="text-align:left;">' . htmlspecialchars($product['name_en'], ENT_QUOTES, 'UTF-8') . '</td>
+        <td width="15%" style="text-align:center; ' . $color . '">' . $quantity . $restock . '</td>
+        <td width="15%" style="text-align: right;">' . number_format($product['price_unit'], 2) . '</td>
     </tr>';
 }
 
 $html .= '</tbody></table>';
 
-
 $pdf->writeHTML($html, true, false, true, false, '');
-
 
 $pdf->Output('stock_report.pdf', 'D');
 exit();
