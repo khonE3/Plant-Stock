@@ -14,19 +14,21 @@ if (!isset($_SESSION['lang'])) {
 
 $lang = [
     'th' => [
-        'title' => 'Water Stock Report (TH/EN)',
+        'title' => 'Plant Stock Report (TH/EN)',
+        'product_id' => 'ไอดีสินค้า',
+        'image' => 'รูปภาพ',
         'name_th' => 'ชื่อ (TH)',
         'name_en' => 'Name (EN)',
         'quantity' => 'จำนวน',
-        'product_id' => 'ไอดีสินค้า',
         'price_unit' => 'ราคา (บาท)'
     ],
     'en' => [
-        'title' => 'Water Stock Report (TH/EN)',
+        'title' => 'Plant Stock Report (TH/EN)',
+        'product_id' => 'Product ID',
+        'image' => 'Image',
         'name_th' => 'Name (TH)',
         'name_en' => 'Name (EN)',
         'quantity' => 'Quantity',
-        'product_id' => 'Product ID',
         'price_unit' => 'Price (THB)'
     ]
 ];
@@ -51,15 +53,17 @@ $html = '<style>
     table { border-collapse: collapse; width: 100%; }
     th, td { border: 1px solid black; padding: 5px; text-align: center; }
     th { background-color: #f2f2f2; font-weight: bold; }
+    img { width: 40px; height: 40px; object-fit: cover; }
 </style>';
 
 $html .= '<h1 style="text-align:center;">' . htmlspecialchars($lang[$current_lang]['title'], ENT_QUOTES, 'UTF-8') . '</h1>';
 $html .= '<table>
     <thead>
         <tr>
-            <th width="20%">' . htmlspecialchars($lang[$current_lang]['product_id'], ENT_QUOTES, 'UTF-8') . '</th>
-            <th width="25%">' . htmlspecialchars($lang[$current_lang]['name_th'], ENT_QUOTES, 'UTF-8') . '</th>
-            <th width="25%">' . htmlspecialchars($lang[$current_lang]['name_en'], ENT_QUOTES, 'UTF-8') . '</th>
+            <th width="15%">' . htmlspecialchars($lang[$current_lang]['product_id'], ENT_QUOTES, 'UTF-8') . '</th>
+            <th width="15%">' . htmlspecialchars($lang[$current_lang]['image'], ENT_QUOTES, 'UTF-8') . '</th>
+            <th width="20%">' . htmlspecialchars($lang[$current_lang]['name_th'], ENT_QUOTES, 'UTF-8') . '</th>
+            <th width="20%">' . htmlspecialchars($lang[$current_lang]['name_en'], ENT_QUOTES, 'UTF-8') . '</th>
             <th width="15%">' . htmlspecialchars($lang[$current_lang]['quantity'], ENT_QUOTES, 'UTF-8') . '</th>
             <th width="15%">' . htmlspecialchars($lang[$current_lang]['price_unit'], ENT_QUOTES, 'UTF-8') . '</th>
         </tr>
@@ -71,10 +75,13 @@ foreach ($products as $product) {
     $color = ($quantity < 5) ? 'color:red; font-weight:bold;' : '';
     $restock = ($quantity < 5) ? ' <span style="color:red;">(Restock)</span>' : '';
 
+    $image_html = $product['image_path'] ? '<img src="' . $product['image_path'] . '">' : '-';
+
     $html .= '<tr>
-        <td width="20%" style="text-align: center;">' . $product['product_id'] . '</td>
-        <td width="25%" style="text-align:left;">' . htmlspecialchars($product['name_th'], ENT_QUOTES, 'UTF-8') . '</td>
-        <td width="25%" style="text-align:left;">' . htmlspecialchars($product['name_en'], ENT_QUOTES, 'UTF-8') . '</td>
+        <td width="15%" style="text-align: center;">' . $product['product_id'] . '</td>
+        <td width="15%">' . $image_html . '</td>
+        <td width="20%" style="text-align:left;">' . htmlspecialchars($product['name_th'], ENT_QUOTES, 'UTF-8') . '</td>
+        <td width="20%" style="text-align:left;">' . htmlspecialchars($product['name_en'], ENT_QUOTES, 'UTF-8') . '</td>
         <td width="15%" style="text-align:center; ' . $color . '">' . $quantity . $restock . '</td>
         <td width="15%" style="text-align: right;">' . number_format($product['price_unit'], 2) . '</td>
     </tr>';
